@@ -69,7 +69,7 @@ void look_for_letter_digit(const std::string& line, const std::string& letter_di
     while(true) {
         // Skip data that we don't care about.
         if (i >= dd.get_start_index() && i <= dd.get_end_index()) {
-            i = dd.get_end_index();
+            i = dd.get_end_index() + 1;
         }
 
         i = line.find(letter_digit, i);
