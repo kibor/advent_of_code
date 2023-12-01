@@ -79,7 +79,7 @@ void look_for_letter_digit(const std::string& line, const std::string& letter_di
         }
 
         dd.add_digit(digit, i);
-        ++i;
+        i += letter_digit.length();
     }
 }
 
