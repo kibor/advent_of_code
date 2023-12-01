@@ -15,7 +15,6 @@ int find_digit(TIter begin, TIter end) {
         exit(1);
     }
 
-    std::cout << "Found digit " << *it << std::endl;
     return *it - '0';
 }
 
@@ -51,7 +50,7 @@ public:
 
     int get_number() const {
         if (start_index == -1 || end_index == -1) {
-            std::cout << "Indexes not initialized" << std::endl;
+            std::cerr << "Indexes not initialized" << std::endl;
             exit(1);
         }
 
@@ -121,13 +120,8 @@ int main()
     long result = 0;
     while (std::getline(input, line))
     {
-        std::cout << "Reading line " << line << std::endl;
         int number = get_number2(line);
-        std::cout << "Number is " << number << std::endl;
-
         result += number;
-
-        std::cout << "Current result is " << result << std::endl;
     }
 
     std::cout << "Result is " << result << std::endl;
