@@ -93,17 +93,17 @@ int get_number2(const std::string& line) {
             dd.add_digit(ch - '0', i);
             continue;
         }
-
-        look_for_letter_digit(line, "one", 1, dd);
-        look_for_letter_digit(line, "two", 2, dd);
-        look_for_letter_digit(line, "three", 3, dd);
-        look_for_letter_digit(line, "four", 4, dd);
-        look_for_letter_digit(line, "five", 5, dd);
-        look_for_letter_digit(line, "six", 6, dd);
-        look_for_letter_digit(line, "seven", 7, dd);
-        look_for_letter_digit(line, "eight", 8, dd);
-        look_for_letter_digit(line, "nine", 9, dd);
     }
+
+    look_for_letter_digit(line, "one", 1, dd);
+    look_for_letter_digit(line, "two", 2, dd);
+    look_for_letter_digit(line, "three", 3, dd);
+    look_for_letter_digit(line, "four", 4, dd);
+    look_for_letter_digit(line, "five", 5, dd);
+    look_for_letter_digit(line, "six", 6, dd);
+    look_for_letter_digit(line, "seven", 7, dd);
+    look_for_letter_digit(line, "eight", 8, dd);
+    look_for_letter_digit(line, "nine", 9, dd);
 
     return dd.get_number();
 }
