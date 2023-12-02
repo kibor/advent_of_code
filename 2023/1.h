@@ -1,3 +1,5 @@
+#pragma once
+
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -107,7 +109,7 @@ int get_number2(const std::string& line) {
     return dd.get_number();
 }
 
-int main()
+int main1()
 {
     std::ifstream input("1.input");
 
