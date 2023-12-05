@@ -7,6 +7,24 @@
 #include <optional>
 #include <ranges>
 #include <ctype.h>
+#include <unordered_map>
+#include <unordered_set>
+
+struct hash_pair {
+    template <class T1, class T2>
+    size_t operator()(const std::pair<T1, T2>&p) const
+    {
+        auto hash1 = std::hash<T1>{}(p.first);
+        auto hash2 = std::hash<T2>{}(p.second);
+
+        if (hash1 != hash2) {
+            return hash1 ^ hash2;
+        }
+
+        // If hash1 == hash2, their XOR is zero.
+        return hash1;
+    }
+};
 
 class Solver {
 public:
@@ -15,51 +33,32 @@ public:
         int curr_x_pos = -1;
         std::optional<NumberDataHolder> curr_number_opt;
 
-        std::cout << "Processing line " << curr_y_pos << std::endl;
         for (char ch : line) {
             ++curr_x_pos;
 
-            std::cout << "x = " << curr_x_pos << ", ch = " << ch << std::endl; 
-
             if (is_dot(ch)) {
-                std::cout << "Found a dot. ";
-                if (!curr_number_opt) {
-                    std::cout << "Not processing numbers, so just continue." << std::endl;
-                    continue;
+                if (curr_number_opt) {
+                    add_number_and_reset(curr_number_opt);
                 }
 
-                add_number(*curr_number_opt);
-                curr_number_opt = std::nullopt;
-                
                 continue;
             }
 
             if (is_digit(ch)) {
-                std::cout << "Found new digit " << ch << ". ";
                 if (!curr_number_opt) {
-                    std::cout << "It is a new number." << std::endl;
-                    curr_number_opt = NumberDataHolder(ch, curr_x_pos, curr_y_pos);
-                    
-                    continue;
+                    curr_number_opt = NumberDataHolder(curr_x_pos, curr_y_pos);
                 }
 
-                std::cout << "Adding digit to the current number." << std::endl;
                 curr_number_opt->add_digit(ch);
-
                 continue;
             }
 
             if (is_symbol(ch)) {
-                std::cout << "Found symbol. ";
-                if (!curr_number_opt) {
-                    add_symbol(curr_x_pos, curr_y_pos);
-
-                    continue;
+                if (curr_number_opt) {
+                    add_number_and_reset(curr_number_opt);
                 }
 
-                add_number(*curr_number_opt);
-                curr_number_opt = std::nullopt;
-                
+                add_symbol(curr_x_pos, curr_y_pos);
                 continue;
             }
 
@@ -68,15 +67,25 @@ public:
         }
 
         if (curr_number_opt) {
-            add_number(*curr_number_opt);
-            curr_number_opt = std::nullopt;
+            add_number_and_reset(curr_number_opt);
         }
 
         ++line_count;
     }
 
-    int get_result() const {
-        return 0;
+    int get_result() {
+        int result = 0;
+
+        std::cout << "Starting to calculate result" << std::endl;
+        for (const auto& [key, value] : numbers) {
+            auto length = get_number_length(value);
+
+            if (coords_are_adjacent(key.first, key.second, length)) {
+                result += value;
+            }
+        }
+
+        return result;
     }
 
 private:
@@ -85,10 +94,9 @@ private:
         int y;
         std::string value;
 
-        NumberDataHolder(char ch, int x, int y) {
+        NumberDataHolder(int x, int y) {
             this->x = x;
             this->y = y;
-            value = ch;
         }
 
         void add_digit(char ch) {
@@ -101,13 +109,56 @@ private:
     };
 
 private:
-    void add_number(const NumberDataHolder& number) {
-        std::cout << "Adding new number " << number.get_value() 
-            << ", x = " << number.x << ", y = " << number.y << std::endl;
+    void handle_dot() {
+
+    }
+
+    bool coords_are_adjacent(int x_pos, int y_pos, int length) const {
+        for (int x = x_pos - 1; x <= x_pos + length; ++x) {
+            if (symbols.contains(std::make_pair(x, y_pos - 1))) {
+                return true;
+            }
+
+            if (symbols.contains(std::make_pair(x, y_pos + 1))) {
+                return true;
+            }
+        }
+
+        if (symbols.contains(std::make_pair(x_pos - 1, y_pos))) {
+            return true;
+        }
+
+        if (symbols.contains(std::make_pair(x_pos + length, y_pos))) {
+            return true;
+        }
+
+        return false;
+    }
+
+    void add_number_and_reset(std::optional<NumberDataHolder>& number) {
+        if (!number) {
+            std::cerr << "Optional is not initialized" << std::endl;
+            exit(1);
+        }
+
+        const auto key = std::make_pair(number->x, number->y);
+        if (numbers.contains(key)) {
+            std::cerr << "Duplicate coords, cannot happen. " << std::endl;
+            exit(1);
+        }
+
+        numbers[key] = number->get_value();
+        number = std::nullopt;
     }
 
     void add_symbol(int x, int y) {
-        std::cout << "Adding new symbol, x = " << x << ", y = " << y << std::endl;
+        const auto key = std::make_pair(x, y);
+        if (symbols.contains(key)) {
+            std::cerr << "Duplicate coords, cannot happen. " << std::endl;
+            exit(1);
+        }
+
+        symbols.insert(key);
     }
 
 
@@ -124,8 +175,22 @@ private:
         return !is_digit(ch) && !is_dot(ch);
     }
 
+    static int get_number_length(int number) {
+        int result = 1;
+        while (number >= 10) {
+            number /= 10;
+            ++result;
+        }
+
+        return result;
+    }
+
 private:
     int line_count = 0;
+
+    typedef std::pair<int, int> coords;
+    std::unordered_map<coords, int, hash_pair> numbers;
+    std::unordered_set<coords, hash_pair> symbols;
 };
 
 int main3() {
@@ -141,6 +206,7 @@ int main3() {
         solver.add_line(line);
     }
 
-    std::cout << "Result is " << solver.get_result() << std::endl;
+    auto result = solver.get_result();
+    std::cout << "Result is " << result << std::endl;
     return 0;
 }
