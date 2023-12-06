@@ -30,6 +30,11 @@ struct hash_pair {
 
 class Solver {
 public:
+    Solver(bool accept_all_symbols = true)
+    : accept_all_symbols(accept_all_symbols) {
+
+    }
+
     void add_line(const std::string& line) {
         int curr_y_pos = line_count;
         int curr_x_pos = -1;
@@ -55,7 +60,7 @@ public:
                 continue;
             }
 
-            if (is_symbol(ch)) {
+            if (is_symbol(ch, accept_all_symbols)) {
                 if (curr_number_opt) {
                     add_number_and_reset(curr_number_opt);
                 }
@@ -64,8 +69,10 @@ public:
                 continue;
             }
 
-            std::cerr << "We shouldn't be here." << std::endl;
-            exit(1);
+            if (accept_all_symbols) {
+                std::cerr << "We shouldn't be here." << std::endl;
+                exit(1);
+            }
         }
 
         if (curr_number_opt) {
@@ -75,7 +82,7 @@ public:
         ++line_count;
     }
 
-    int get_result() {
+    int get_result() const {
         int result = 0;
 
         std::cout << "Starting to calculate result" << std::endl;
@@ -85,6 +92,35 @@ public:
             if (coords_are_adjacent(key.first, key.second, length)) {
                 result += value;
             }
+        }
+
+        return result;
+    }
+
+    size_t get_result2() const {
+        size_t result = 0;
+
+        std::cout << "Symbols count is " << symbols.size() << std::endl;
+
+        for (const auto& key : symbols) {
+            const auto gears = get_adjacent_numbers(key.first, key.second);
+            if (gears.size() < 2) {
+                continue;
+            }
+
+            if (gears.size() > 2) {
+                std::cerr << "Too many gears" << std::endl;
+                exit(1);
+            }
+
+            auto it = gears.begin();
+            int first_number = *it;
+            ++it;
+            int second_number = *it;
+
+            std::cout << "New gears are " << first_number << " and " << second_number << std::endl;
+
+            result += first_number * second_number;
         }
 
         return result;
@@ -111,10 +147,6 @@ private:
     };
 
 private:
-    void handle_dot() {
-
-    }
-
     bool coords_are_adjacent(int x_pos, int y_pos, int length) const {
         for (int x = x_pos - 1; x <= x_pos + length; ++x) {
             if (symbols.contains(std::make_pair(x, y_pos - 1))) {
@@ -135,6 +167,40 @@ private:
         }
 
         return false;
+    }
+
+    std::optional<int> get_number_by_coords(int x, int y) const {
+        const int max_length = 3;
+        for (int x1 = x - max_length + 1; x1 <= x; ++x1) {
+            const auto key = std::make_pair(x1, y);
+            const auto value_it = numbers.find(key);
+            if (value_it != numbers.end()) {
+                auto value = value_it->second;
+                int length = get_number_length(value);
+                if (x1 + length - 1 >= x) {
+                    return std::make_optional(value_it->second);
+                }
+            }
+        }
+
+        return std::nullopt;
+    }
+
+    std::unordered_set<int> get_adjacent_numbers(int x, int y) const {
+        std::cout << "Checking for symbol with coords " << x << ", " << y << std::endl;
+        std::unordered_set<int> v;
+
+        for (int pos_x = x - 1; pos_x <= x + 1; ++pos_x) {
+            for (int pos_y = y - 1; pos_y <= y + 1; ++pos_y) {
+                auto number_opt = get_number_by_coords(pos_x, pos_y);
+                if (number_opt) {
+                    std::cout << "Found number " << *number_opt << std::endl;
+                    v.insert(*number_opt);
+                }
+            }
+        }
+
+        return v;
     }
 
     void add_number_and_reset(std::optional<NumberDataHolder>& number) {
@@ -173,8 +239,12 @@ private:
         return ch == '.';
     }
 
-    static bool is_symbol(char ch) {
-        return !is_digit(ch) && !is_dot(ch);
+    static bool is_symbol(char ch, bool accept_all_symbols) {
+        if (accept_all_symbols) {
+            return !is_digit(ch) && !is_dot(ch);
+        }
+
+        return ch == '*';
     }
 
     static int get_number_length(int number) {
@@ -189,6 +259,7 @@ private:
 
 private:
     int line_count = 0;
+    const bool accept_all_symbols;
 
     typedef std::pair<int, int> coords;
     std::unordered_map<coords, int, hash_pair> numbers;
@@ -203,12 +274,12 @@ int main() {
     }
 
     std::string line;
-    Solver solver;
+    Solver solver(false);
     while (std::getline(input, line)) {
         solver.add_line(line);
     }
 
-    auto result = solver.get_result();
+    auto result = solver.get_result2();
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
