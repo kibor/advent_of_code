@@ -11,6 +11,8 @@
 #include <unordered_map>
 #include <vector>
 
+namespace task2 {
+
 std::vector<std::string_view> split_string(const std::string_view& str, const std::string& delim) {
     std::vector<std::string_view> result;
     for (const auto word : std::views::split(str, delim)) {
@@ -110,7 +112,7 @@ int game_power(const std::string_view game_str) {
     return result;
 }
 
-int main2()
+int main()
 {
     std::ifstream input("2.input");
 
@@ -138,3 +140,5 @@ int main2()
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
+
+} // task2

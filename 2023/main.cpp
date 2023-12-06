@@ -3,9 +3,9 @@
 #include "3.h"
 
 int main() {
-	// main1();
-	// main2();
-	main3();
+	// task1::main();
+	// task2::main();
+	task3::main();
 
 	return 0;
 }

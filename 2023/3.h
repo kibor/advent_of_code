@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+namespace task3 {
+
 struct hash_pair {
     template <class T1, class T2>
     size_t operator()(const std::pair<T1, T2>&p) const
@@ -193,7 +195,7 @@ private:
     std::unordered_set<coords, hash_pair> symbols;
 };
 
-int main3() {
+int main() {
     std::ifstream input("3.input");
     if (!input) {
         std::cerr << "Can't open file.";
@@ -210,3 +212,5 @@ int main3() {
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
+
+} // task3

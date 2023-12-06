@@ -7,6 +7,8 @@
 #include <optional>
 #include <ranges>
 
+namespace task1 {
+
 template<typename TIter>
 int find_digit(TIter begin, TIter end) {
     auto criteria = [](char ch) { return ch >= '0' && ch <= '9'; };
@@ -109,7 +111,7 @@ int get_number2(const std::string& line) {
     return dd.get_number();
 }
 
-int main1()
+int main()
 {
     std::ifstream input("1.input");
 
@@ -129,3 +131,5 @@ int main1()
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
+
+} // task1
