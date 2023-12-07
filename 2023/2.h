@@ -11,29 +11,9 @@
 #include <unordered_map>
 #include <vector>
 
+#include "common.h"
+
 namespace task2 {
-
-std::vector<std::string_view> split_string(const std::string_view& str, const std::string& delim) {
-    std::vector<std::string_view> result;
-    for (const auto word : std::views::split(str, delim)) {
-        std::string_view token(word.begin(), word.end());
-        result.push_back(token);
-    }
-
-    return result;
-}
-
-int parse_int(const std::string_view int_str) {
-    int result = 0;
-    auto [ptr, ec] = std::from_chars(int_str.data(), int_str.data() + int_str.length(), result);
-
-    if (ec != std::errc()) {
-        std::cerr << "Cannot parse count" << std::endl;
-        exit(1);
-    }
-
-    return result;
-}
 
 bool possible_set(const std::string_view color, int count) {
     const int RED_LIMIT = 12;
@@ -64,16 +44,16 @@ bool possible_set(const std::string_view color, int count) {
 }
 
 bool game_is_possible(const std::string_view game_str) {
-    for (auto game_set_str : split_string(game_str, "; ")) {
-        for (auto result_str : split_string(game_set_str, ", ")) {
-            auto result_pair_str = split_string(result_str, " ");
+    for (auto game_set_str : common::split_string(game_str, "; ")) {
+        for (auto result_str : common::split_string(game_set_str, ", ")) {
+            auto result_pair_str = common::split_string(result_str, " ");
             
             if (result_pair_str.size() != 2) {
                 std::cerr << "Cannot parse game result" << std::endl;
                 exit(1);
             }
 
-            int count = parse_int(result_pair_str[0]);
+            int count = common::parse_int(result_pair_str[0]);
             auto color = result_pair_str[1];
             if (!possible_set(color, count)) {
                 return false;
@@ -87,16 +67,16 @@ bool game_is_possible(const std::string_view game_str) {
 int game_power(const std::string_view game_str) {
     std::unordered_map<std::string_view, int> counts;
 
-    for (auto game_set_str : split_string(game_str, "; ")) {
-        for (auto result_str : split_string(game_set_str, ", ")) {
-            auto result_pair_str = split_string(result_str, " ");
+    for (auto game_set_str : common::split_string(game_str, "; ")) {
+        for (auto result_str : common::split_string(game_set_str, ", ")) {
+            auto result_pair_str = common::split_string(result_str, " ");
 
             if (result_pair_str.size() != 2) {
                 std::cerr << "Cannot parse game result" << std::endl;
                 exit(1);
             }
 
-            int count = parse_int(result_pair_str[0]);
+            int count = common::parse_int(result_pair_str[0]);
             auto color = result_pair_str[1];
             if (counts[color] < count) {
                 counts[color] = count;
@@ -128,7 +108,7 @@ int main()
     {
         ++game_number;
         std::cout << "New game " << game_number << ": " << line << std::endl;
-        auto parsed_line = split_string(line, ": ");
+        auto parsed_line = common::split_string(line, ": ");
         if (parsed_line.size() != 2) {
             std::cerr << "Cannot parse line correctly." << std::endl;
             exit(1);
