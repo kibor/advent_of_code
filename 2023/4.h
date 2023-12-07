@@ -13,16 +13,14 @@
 
 namespace task4 {
 
-std::string trim(const std::string_view sv) {
-    std::string s(sv);
-
-    auto view = s 
+std::string_view trim(const std::string_view sv) {
+    auto view = sv
         | std::views::drop_while(isspace) 
         | std::views::reverse 
         | std::views::drop_while(isspace)
         | std::views::reverse;
 
-    return std::string{view.begin(), view.end()};
+    return std::string_view{view.begin().base().base(), view.end().base().base()};
 }
 
 int get_card_score(const std::string& line) {
@@ -37,13 +35,11 @@ int get_card_score(const std::string& line) {
     bool read_all_winning_cards = false;
     int won_count = 0;
 
-    for (const auto token : common::split_string(numbers, " ")) {
-        auto word = trim(token);
-        if (word.empty()) {
-            continue;
-        }
+    for (const auto word : common::split_string(numbers, " ") 
+            | std::views::transform(trim)
+            | std::views::filter([](const std::string_view& str) { return !str.empty();})            
+        ) {
 
-        std::cout << "Processing word " << word << std::endl;
         if (word == "|") {
             read_all_winning_cards = true;
             continue;
@@ -71,10 +67,14 @@ int main()
 
     std::string line;
     long result = 0;
+    long card_id = 0;
     while (std::getline(input, line))
     {
-        int number = get_card_score(line);
-        result += number;
+        ++card_id;
+        int score = get_card_score(line);
+        result += score;
+
+        std::cout << "Card " << card_id << " has score " << score << std::endl;
     }
 
     std::cout << "Result is " << result << std::endl;
