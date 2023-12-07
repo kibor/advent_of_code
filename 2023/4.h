@@ -37,7 +37,7 @@ int get_card_score(const std::string& line) {
 
     for (const auto word : common::split_string(numbers, " ") 
             | std::views::transform(trim)
-            | std::views::filter([](const std::string_view& str) { return !str.empty();})            
+            | std::views::filter([](const std::string_view& str) { return !str.empty(); })
         ) {
 
         if (word == "|") {
