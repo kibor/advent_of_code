@@ -22,8 +22,7 @@ std::string trim(const std::string_view sv) {
         | std::views::drop_while(isspace)
         | std::views::reverse;
 
-    std::string result{view.begin(), view.end()};
-    return result;
+    return std::string{view.begin(), view.end()};
 }
 
 int get_card_score(const std::string& line) {
