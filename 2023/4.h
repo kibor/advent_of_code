@@ -14,16 +14,6 @@
 
 namespace task4 {
 
-std::string_view trim(const std::string_view sv) {
-    auto view = sv
-        | std::views::drop_while(isspace) 
-        | std::views::reverse 
-        | std::views::drop_while(isspace)
-        | std::views::reverse;
-
-    return std::string_view{view.begin().base().base(), view.end().base().base()};
-}
-
 int get_winning_cards_count(const std::string& line) {
     auto it = std::ranges::find(line, ':');
     if (it == line.end()) {
@@ -37,7 +27,7 @@ int get_winning_cards_count(const std::string& line) {
     int won_count = 0;
 
     for (const auto word : common::split_string(numbers, " ") 
-            | std::views::transform(trim)
+            | std::views::transform(common::trim)
             | std::views::filter([](const std::string_view& str) { return !str.empty(); })
         ) {
 
@@ -46,7 +36,7 @@ int get_winning_cards_count(const std::string& line) {
             continue;
         }
 
-        int number = common::parse_int(word);
+        int number = common::parse_number<int>(word);
         if (read_all_winning_cards) {
             won_count += winning_numbers.contains(number) ? 1 : 0;
         } else {

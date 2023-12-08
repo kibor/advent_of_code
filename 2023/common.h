@@ -10,8 +10,9 @@
 
 namespace common {
 
-int parse_int(const std::string_view int_str) {
-    int result = 0;
+template<typename T>
+T parse_number(const std::string_view int_str) {
+    T result = 0;
     auto [ptr, ec] = std::from_chars(int_str.data(), int_str.data() + int_str.length(), result);
 
     if (ec != std::errc()) {
@@ -31,6 +32,20 @@ std::vector<std::string_view> split_string(const std::string_view& str, const st
     }
 
     return result;
+}
+
+std::string_view trim(const std::string_view sv) {
+    auto view = sv
+        | std::views::drop_while(isspace) 
+        | std::views::reverse 
+        | std::views::drop_while(isspace)
+        | std::views::reverse;
+
+    return std::string_view{view.begin().base().base(), view.end().base().base()};
+}
+
+std::string sv_to_string(const std::string_view sv) {
+    return std::string(sv.begin(), sv.end());
 }
 
 } // common

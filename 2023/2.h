@@ -53,7 +53,7 @@ bool game_is_possible(const std::string_view game_str) {
                 exit(1);
             }
 
-            int count = common::parse_int(result_pair_str[0]);
+            int count = common::parse_number<int>(result_pair_str[0]);
             auto color = result_pair_str[1];
             if (!possible_set(color, count)) {
                 return false;
@@ -76,7 +76,7 @@ int game_power(const std::string_view game_str) {
                 exit(1);
             }
 
-            int count = common::parse_int(result_pair_str[0]);
+            int count = common::parse_number<int>(result_pair_str[0]);
             auto color = result_pair_str[1];
             if (counts[color] < count) {
                 counts[color] = count;
