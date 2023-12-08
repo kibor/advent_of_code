@@ -48,4 +48,6 @@ std::string sv_to_string(const std::string_view sv) {
     return std::string(sv.begin(), sv.end());
 }
 
+#define VERIFY(x, msg) if (!(x)) { std::cerr msg << std::endl; exit(1); }
+
 } // common

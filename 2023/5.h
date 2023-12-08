@@ -10,6 +10,8 @@
 #include <unordered_set>
 #include <unordered_map>
 
+#include <assert.h>
+
 #include "common.h"
 
 namespace task5 {
@@ -79,10 +81,7 @@ public:
 private:
     void handle_seeds(const std::string& line) {
         auto dots = std::ranges::find(line, ':');
-        if (dots == line.end()) {
-            std::cerr << "Can't find :" << std::endl;
-            exit(1);
-        }
+        VERIFY(dots != line.end(), << "Can't find dots");
 
         for (const auto seed : 
                 common::split_string({dots + 1, line.end()}, " ")
@@ -90,7 +89,6 @@ private:
                 | std::views::filter([](std::string_view sv) { return !sv.empty(); })
                 | std::views::transform(common::parse_number<unsigned long>)
             ) {
-
             std::cout << "Pushing seed " << seed << std::endl;
             seeds.push_back(seed);
         }
@@ -108,32 +106,20 @@ private:
     }
 
     void set_new_mapper(const std::string& line) {
-        if (!current_mapper.empty()) {
-            std::cerr << "Can't start new mapper until old is done" << std::endl;
-            exit(1);
-        }
+        VERIFY(current_mapper.empty(), << "Can't start new mapper until old is done");
 
         auto blank = std::ranges::find(line, ' ');
-        if (blank == line.end()) {
-            std::cerr << "Wrong format for name" << std::endl;
-            exit(1);
-        }
+        VERIFY(blank != line.end(), << "Wrong format for name " << line);
 
         const auto mappings = common::split_string({line.begin(), blank}, "-") 
                             | std::views::transform(common::sv_to_string);
 
-        if (mappings.size() != 3) {
-            std::cerr << "Wrong format for name" << std::endl;
-            exit(1);
-        }
+        VERIFY(mappings.size() == 3, << "Wrong format for name. Size must be 3, but it is " << mappings.size());
 
         const std::string source = mappings[0];
         const std::string dest = mappings[2];
 
-        if (mappers.contains(source)) {
-            std::cerr << "Mapper already exists " << std::endl;
-            exit(1);
-        }
+        VERIFY(!mappers.contains(source), << "Mapper already exists ");
 
         std::cout << "Creating new mapper from " << source << " to " << dest << std::endl;
         mappers[source] = Mapper(source, dest);
@@ -155,20 +141,13 @@ private:
             values.push_back(value);
         }
 
-        if (values.size() != 3) {
-            std::cerr << "Wrong range format" << std::endl;
-            exit(1);
-        }
-
+        VERIFY(values.size() == 3, << "Wrong range format");
         get_current_mapper().add_range(values[0], values[1], values[2]);
     }
 
     Mapper& get_mapper(const std::string& name) {
         auto it = mappers.find(name);
-        if (it == mappers.end()) {
-            std::cerr << "Can't find mapper " << name << std::endl;
-            exit(1);
-        }
+        VERIFY(it != mappers.end(), << "Can't find mapper");
 
         return it->second;
     }
@@ -219,11 +198,7 @@ private:
 
 unsigned long main() {
     std::ifstream input("5.input");
-
-    if (!input) {
-        std::cerr << "Can't open file.";
-        return 1;
-    }
+    VERIFY(input, << "Can't open file");
 
     Solver solver;
     std::string line;
