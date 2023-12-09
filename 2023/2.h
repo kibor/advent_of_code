@@ -21,37 +21,23 @@ bool possible_set(const std::string_view color, int count) {
     const int BLUE_LIMIT = 14;
     
     if (color == "red") {
-        if (count > RED_LIMIT) {
-            return false;
-        }
+        return count <= RED_LIMIT;
     }
-    else if (color == "green") {
-        if (count > GREEN_LIMIT) {
-            return false;
-        }
+    if (color == "green") {
+        return count <= GREEN_LIMIT;
     }
-    else if (color == "blue") {
-        if (count > BLUE_LIMIT) {
-            return false;
-        }
-    }
-    else {
-        std::cerr << "Unknown color " << color << std::endl;
-        exit(1);
+    if (color == "blue") {
+        return count <= BLUE_LIMIT;
     }
 
-    return true;
+    VERIFY(false, << "Unknown color" << color);
 }
 
 bool game_is_possible(const std::string_view game_str) {
     for (auto game_set_str : common::split_string(game_str, "; ")) {
         for (auto result_str : common::split_string(game_set_str, ", ")) {
             auto result_pair_str = common::split_string(result_str, " ");
-            
-            if (result_pair_str.size() != 2) {
-                std::cerr << "Cannot parse game result" << std::endl;
-                exit(1);
-            }
+            VERIFY(result_pair_str.size() == 2, << "Cannot parse game result");
 
             int count = common::parse_number<int>(result_pair_str[0]);
             auto color = result_pair_str[1];
@@ -70,11 +56,7 @@ int game_power(const std::string_view game_str) {
     for (auto game_set_str : common::split_string(game_str, "; ")) {
         for (auto result_str : common::split_string(game_set_str, ", ")) {
             auto result_pair_str = common::split_string(result_str, " ");
-
-            if (result_pair_str.size() != 2) {
-                std::cerr << "Cannot parse game result" << std::endl;
-                exit(1);
-            }
+            VERIFY(result_pair_str.size() == 2, << "Cannot parse game result");
 
             int count = common::parse_number<int>(result_pair_str[0]);
             auto color = result_pair_str[1];
@@ -108,11 +90,9 @@ int main()
     {
         ++game_number;
         std::cout << "New game " << game_number << ": " << line << std::endl;
+
         auto parsed_line = common::split_string(line, ": ");
-        if (parsed_line.size() != 2) {
-            std::cerr << "Cannot parse line correctly." << std::endl;
-            exit(1);
-        }
+        VERIFY(parsed_line.size() == 2, << "Cannot parse line correctly.");
 
         result += game_power(parsed_line[1]);
     }

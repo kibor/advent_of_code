@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "common.h"
+
 namespace task3 {
 
 struct hash_pair {
@@ -69,10 +71,7 @@ public:
                 continue;
             }
 
-            if (accept_all_symbols) {
-                std::cerr << "We shouldn't be here." << std::endl;
-                exit(1);
-            }
+            VERIFY(!accept_all_symbols, << "We shouldn't be here.");
         }
 
         if (curr_number_opt) {
@@ -108,10 +107,7 @@ public:
                 continue;
             }
 
-            if (gears.size() > 2) {
-                std::cerr << "Too many gears" << std::endl;
-                exit(1);
-            }
+            VERIFY(gears.size() > 2, << "Too many gears");
 
             auto it = gears.begin();
             int first_number = *it;
@@ -174,6 +170,7 @@ private:
         for (int x1 = x - max_length + 1; x1 <= x; ++x1) {
             const auto key = std::make_pair(x1, y);
             const auto value_it = numbers.find(key);
+
             if (value_it != numbers.end()) {
                 auto value = value_it->second;
                 int length = get_number_length(value);
@@ -204,16 +201,10 @@ private:
     }
 
     void add_number_and_reset(std::optional<NumberDataHolder>& number) {
-        if (!number) {
-            std::cerr << "Optional is not initialized" << std::endl;
-            exit(1);
-        }
+        VERIFY(number, << "Optional is not initialized");
 
         const auto key = std::make_pair(number->x, number->y);
-        if (numbers.contains(key)) {
-            std::cerr << "Duplicate coords, cannot happen. " << std::endl;
-            exit(1);
-        }
+        VERIFY(!numbers.contains(key), << "Duplicate coords, cannot happen.");
 
         numbers[key] = number->get_value();
         number = std::nullopt;
@@ -221,10 +212,7 @@ private:
 
     void add_symbol(int x, int y) {
         const auto key = std::make_pair(x, y);
-        if (symbols.contains(key)) {
-            std::cerr << "Duplicate coords, cannot happen. " << std::endl;
-            exit(1);
-        }
+        VERIFY(!symbols.contains(key), << "Duplicate coords, cannot happen.");
 
         symbols.insert(key);
     }
@@ -268,10 +256,7 @@ private:
 
 int main() {
     std::ifstream input("3.input");
-    if (!input) {
-        std::cerr << "Can't open file.";
-        return 1;
-    }
+    VERIFY(input, << "Can't open file.");
 
     std::string line;
     Solver solver(false);

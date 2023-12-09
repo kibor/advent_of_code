@@ -16,10 +16,7 @@ namespace task4 {
 
 int get_winning_cards_count(const std::string& line) {
     auto it = std::ranges::find(line, ':');
-    if (it == line.end()) {
-        std::cerr << "Can't find delimeter" << std::endl;
-        exit(1);
-    }
+    VERIFY(it != line.end(), << "Can't find delimeter");
 
     std::string_view numbers(it + 1, line.end());
     std::unordered_set<int> winning_numbers;
@@ -78,11 +75,7 @@ int get_cards_copies_count() {
 int main()
 {
     std::ifstream input("4.input");
-
-    if (!input) {
-        std::cerr << "Can't open file.";
-        return 1;
-    }
+    VERIFY(input, << "Can't open file.");
 
     std::string line;
     long result = 0;

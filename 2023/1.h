@@ -7,6 +7,8 @@
 #include <optional>
 #include <ranges>
 
+#include "common.h"
+
 namespace task1 {
 
 template<typename TIter>
@@ -14,10 +16,7 @@ int find_digit(TIter begin, TIter end) {
     auto criteria = [](char ch) { return ch >= '0' && ch <= '9'; };
 
     auto it = std::ranges::find_if(begin, end, criteria);
-    if (it == end) {
-        std::cerr << "Can't find digit" << std::endl;
-        exit(1);
-    }
+    VERIFY(it != end, << "Can't find digit");
 
     return *it - '0';
 }
@@ -53,11 +52,7 @@ public:
     int get_end_index() const { return end_index; }
 
     int get_number() const {
-        if (start_index == -1 || end_index == -1) {
-            std::cerr << "Indexes not initialized" << std::endl;
-            exit(1);
-        }
-
+        VERIFY(start_index != -1 && end_index != -1, << "Indexes not initialized");
         return 10 * start_digit + end_digit;
     }
 
@@ -114,11 +109,7 @@ int get_number2(const std::string& line) {
 int main()
 {
     std::ifstream input("1.input");
-
-    if (!input) {
-        std::cerr << "Can't open file.";
-        return 1;
-    }
+    VERIFY(input, << "Can't open file");
 
     std::string line;
     long result = 0;
