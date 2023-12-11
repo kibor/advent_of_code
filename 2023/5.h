@@ -9,8 +9,7 @@
 #include <ranges>
 #include <unordered_set>
 #include <unordered_map>
-
-#include <assert.h>
+#include <tuple>
 
 #include "common.h"
 
@@ -30,21 +29,6 @@ public:
         }
 
         handle_mappings(line);
-    }
-
-    unsigned long get_location_by_seed(unsigned long seed) {
-        std::string mapper_name = "seed";
-        unsigned long value = seed;
-
-        while (true) {
-            auto& mapper = get_mapper(mapper_name);
-            value = mapper.map_value(value);
-            mapper_name = mapper.get_dest();
-
-            if (mapper_name == "location") {
-                return value;
-            }
-        }
     }
 
     unsigned long get_min_location() {
@@ -77,6 +61,12 @@ public:
         return min_location;
     }
 
+    void optimize_mappers() {
+        for (auto& [mapper_name, mapper] : mappers) {
+            mapper.optimize();
+        }
+
+    }
 
 private:
     void handle_seeds(const std::string& line) {
@@ -100,6 +90,22 @@ private:
         current_mapper = "";
     }
 
+    unsigned long get_location_by_seed(unsigned long seed) {
+        std::string mapper_name = "seed";
+        unsigned long value = seed;
+
+        while (true) {
+            auto& mapper = get_mapper(mapper_name);
+            value = mapper.map_value(value);
+            mapper_name = mapper.get_dest();
+
+            if (mapper_name == "location") {
+                return value;
+            }
+        }
+    }
+
+
     class Mapper;
     Mapper& get_current_mapper() {
         return get_mapper(current_mapper);
@@ -108,20 +114,11 @@ private:
     void set_new_mapper(const std::string& line) {
         VERIFY(current_mapper.empty(), << "Can't start new mapper until old is done");
 
-        auto blank = std::ranges::find(line, ' ');
-        VERIFY(blank != line.end(), << "Wrong format for name " << line);
-
-        const auto mappings = common::split_string({line.begin(), blank}, "-") 
-                            | std::views::transform(common::sv_to_string);
-
-        VERIFY(mappings.size() == 3, << "Wrong format for name. Size must be 3, but it is " << mappings.size());
-
-        const std::string source = mappings[0];
-        const std::string dest = mappings[2];
-
+        const auto [source, dest] = extract_source_and_dest(line);
         VERIFY(!mappers.contains(source), << "Mapper already exists ");
 
         std::cout << "Creating new mapper from " << source << " to " << dest << std::endl;
+
         mappers[source] = Mapper(source, dest);
         current_mapper = source;
     }
@@ -150,6 +147,17 @@ private:
         VERIFY(it != mappers.end(), << "Can't find mapper");
 
         return it->second;
+    }
+
+    static std::tuple<std::string, std::string> extract_source_and_dest(const std::string& line) {
+        auto blank = std::ranges::find(line, ' ');
+        VERIFY(blank != line.end(), << "Wrong format for name " << line);
+
+        const auto mappings = common::split_string({line.begin(), blank}, "-") 
+                            | std::views::transform(common::sv_to_string);
+
+        VERIFY(mappings.size() == 3, << "Wrong format for name. Size must be 3, but it is " << mappings.size());
+        return std::make_tuple(mappings[0], mappings[2]);
     }
 
 private:
@@ -184,6 +192,17 @@ private:
             return source;
         }
 
+        void optimize() {
+            auto compare = [](const MappingRange& lhs, const MappingRange& rhs) { return lhs.source_range_start < rhs.source_range_start; };
+            std::sort(ranges.begin(), ranges.end(), compare);
+
+            std::cout << "Mapper from " << source << " to " << dest << " has ranges: " << std::endl;
+            for (const auto& r : ranges) {
+                std::cout << "\tsource range: " << r.source_range_start << " - " << r.source_range_start + r.range - 1
+                    << ", dest range: " << r.dest_range_start << " - " << r.dest_range_start + r.range - 1 << std::endl;
+            }
+        }
+
     private:
         std::string source;
         std::string dest;
@@ -205,6 +224,9 @@ unsigned long main() {
     while (std::getline(input, line)) {
         solver.add_line(line);
     }
+
+    solver.optimize_mappers();
+    return 0;
 
     unsigned long min_location = solver.get_min_location2();
     std::cout << "min location is " << min_location << std::endl;
