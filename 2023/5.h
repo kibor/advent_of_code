@@ -10,6 +10,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <tuple>
+#include <limits>
 
 #include "common.h"
 
@@ -48,13 +49,22 @@ public:
     unsigned long get_min_location2() {
         unsigned long min_location = -1;
         for (int i = 0; i < seeds.size(); i += 2) {
-            for (int seed = seeds[i]; seed < seeds[i] + seeds[i + 1]; ++seed) {
-                unsigned long location = get_location_by_seed(seed);
-                std::cout << "Seed " << seed << " has location " << location << std::endl;
+            auto input_range = std::make_pair(seeds[i], seeds[i + 1]);
+
+            while(input_range.second != 0) {
+                auto seed = input_range.first;
+                auto location = get_location_by_seed(seed);
+                std::cout << "Min location for seed " << seed  << " is " << location << std::endl;
 
                 if (min_location == -1 || min_location > location) {
                     min_location = location;
                 }
+
+                auto new_range = get_min_range(input_range);
+                input_range.first += new_range;
+
+                VERIFY(input_range.second >= new_range, << "Can never happen");
+                input_range.second -= new_range;
             }
         }        
 
@@ -160,11 +170,49 @@ private:
         return std::make_tuple(mappings[0], mappings[2]);
     }
 
+    typedef std::pair<unsigned long, unsigned long> Range;
+
+    unsigned long get_min_range(const Range& seeds_range) {
+        std::string mapper_name = "seed";
+        auto result = seeds_range;
+
+        while (true) {
+            auto& mapper = get_mapper(mapper_name);
+
+            std::cout << "Mapping " << mapper_name << " to " << mapper.get_dest() << std::endl;
+            std::cout << "Input range is from " << result.first << " to "
+                << result.first + result.second - 1
+                << ", range length is " << result.second
+                << std::endl;
+
+            result = mapper.get_minimal_range(result);
+
+            std::cout << "Output range is from " << result.first << " to "
+                << result.first + result.second - 1
+                << ", range length is " << result.second
+                << std::endl;
+
+            mapper_name = mapper.get_dest();
+
+            if (mapper_name == "location") {
+                return result.second;
+            }
+        }
+    }
+
 private:
     struct MappingRange {
         unsigned long dest_range_start;
         unsigned long source_range_start;
         unsigned long range;
+
+        bool contains_source(unsigned long p) const {
+            return source_range_start <= p && source_range_start + range > p;
+        }
+
+        unsigned long map_to_range(unsigned long source) const {
+            return dest_range_start + (source - source_range_start);
+        }
     };
 
     class Mapper {
@@ -183,23 +231,70 @@ private:
         const std::string& get_source() const { return source; }
         const std::string& get_dest() const { return dest; }
 
-        unsigned long map_value(unsigned long source) const {
-            for (const auto& range : ranges) {
-                if (source >= range.source_range_start && source < range.source_range_start + range.range) {
-                    return range.dest_range_start + (source - range.source_range_start);
+        unsigned long map_value(unsigned long s) const {
+            for (const auto& r : ranges) {
+                if (r.contains_source(s)) {
+                    return r.map_to_range(s);
                 }
             }
-            return source;
+
+            return s;
+        }
+
+        Range get_minimal_range(const Range& input_range) const {
+            for (const auto& r : ranges) {
+                std::cout << "Checking if " << input_range.first << " is between "
+                    << r.source_range_start << " and " << r.source_range_start + r.range << std::endl;
+
+                if (!r.contains_source(input_range.first)) {
+                    continue;
+                }
+
+                std::cout << "Checking successful" << std::endl;
+
+                auto range_start = r.map_to_range(input_range.first);
+                auto range_end = std::min(input_range.second, r.dest_range_start + r.range - range_start);
+                return std::make_pair(range_start, range_end);
+            }
+
+            VERIFY(false, << "We can't be here");
         }
 
         void optimize() {
+            VERIFY(!ranges.empty(), << "Ranges can't be empty");
+
             auto compare = [](const MappingRange& lhs, const MappingRange& rhs) { return lhs.source_range_start < rhs.source_range_start; };
+            std::sort(ranges.begin(), ranges.end(), compare);
+
+            const auto& last = *ranges.rbegin();
+            if (last.source_range_start + last.range < std::numeric_limits<unsigned long>::max()) {
+                add_range(last.source_range_start + last.range, last.source_range_start + last.range,
+                    std::numeric_limits<unsigned long>::max() - last.source_range_start - last.range);
+            }
+
+            const auto& first = *ranges.begin();
+            if (first.source_range_start != 0) {
+                add_range(0, 0, first.source_range_start);
+            }
+
             std::sort(ranges.begin(), ranges.end(), compare);
 
             std::cout << "Mapper from " << source << " to " << dest << " has ranges: " << std::endl;
             for (const auto& r : ranges) {
                 std::cout << "\tsource range: " << r.source_range_start << " - " << r.source_range_start + r.range - 1
                     << ", dest range: " << r.dest_range_start << " - " << r.dest_range_start + r.range - 1 << std::endl;
+            }
+
+            for (int i = 0; i < ranges.size() - 1; ++i) {
+                if (ranges[i].source_range_start + ranges[i].range != ranges[i + 1].source_range_start) {
+                    std::cerr << "Broken range" << std::endl;
+                    auto new_start = ranges[i].source_range_start + ranges[i].range;
+
+                    add_range(new_start, new_start, ranges[i + 1].source_range_start - new_start);
+                    std::sort(ranges.begin(), ranges.end(), compare);
+
+                    optimize();
+                }
             }
         }
 
@@ -226,11 +321,9 @@ unsigned long main() {
     }
 
     solver.optimize_mappers();
-    return 0;
+    auto result = solver.get_min_location2();
 
-    unsigned long min_location = solver.get_min_location2();
-    std::cout << "min location is " << min_location << std::endl;
-
+    std::cout << "Min location is " << result << std::endl;
     return 0;
 }
 
