@@ -1,12 +1,10 @@
 #pragma once
 
+#include <algorithm>
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <iterator>
 #include <string_view>
-#include <optional>
-#include <ranges>
 #include <unordered_set>
 #include <unordered_map>
 
