@@ -3,11 +3,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include <iterator>
 #include <string_view>
-#include <optional>
-#include <ranges>
-#include <unordered_set>
 #include <unordered_map>
 #include <tuple>
 #include <limits>
@@ -264,7 +260,7 @@ private:
             VERIFY(!ranges.empty(), << "Ranges can't be empty");
 
             auto compare = [](const MappingRange& lhs, const MappingRange& rhs) { return lhs.source_range_start < rhs.source_range_start; };
-            std::sort(ranges.begin(), ranges.end(), compare);
+            std::ranges::sort(ranges, compare);
 
             const auto& last = *ranges.rbegin();
             if (last.source_range_start + last.range < std::numeric_limits<unsigned long>::max()) {
@@ -277,7 +273,7 @@ private:
                 add_range(0, 0, first.source_range_start);
             }
 
-            std::sort(ranges.begin(), ranges.end(), compare);
+            std::ranges::sort(ranges, compare);
 
             std::cout << "Mapper from " << source << " to " << dest << " has ranges: " << std::endl;
             for (const auto& r : ranges) {
@@ -291,7 +287,7 @@ private:
                     auto new_start = ranges[i].source_range_start + ranges[i].range;
 
                     add_range(new_start, new_start, ranges[i + 1].source_range_start - new_start);
-                    std::sort(ranges.begin(), ranges.end(), compare);
+                    std::ranges::sort(ranges, compare);
 
                     optimize();
                 }
