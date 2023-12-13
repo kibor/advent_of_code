@@ -10,18 +10,15 @@
 
 namespace common {
 
+#define VERIFY(x, msg) if (!(x)) { std::cerr msg << std::endl; exit(1); }
+
 template<typename T>
 T parse_number(const std::string_view int_str) {
     T result = 0;
     auto [ptr, ec] = std::from_chars(int_str.data(), int_str.data() + int_str.length(), result);
 
-    if (ec != std::errc()) {
-        std::cerr << "Cannot parse number for string " << int_str << std::endl;
-        exit(1);
-    }
-
-    return result;
-    
+    VERIFY(ec == std::errc(), << "Cannot parse number for string " << int_str);
+    return result;    
 }
 
 std::vector<std::string_view> split_string(const std::string_view& str, const std::string& delim) {
@@ -47,7 +44,5 @@ std::string_view trim(const std::string_view sv) {
 std::string sv_to_string(const std::string_view sv) {
     return std::string(sv.begin(), sv.end());
 }
-
-#define VERIFY(x, msg) if (!(x)) { std::cerr msg << std::endl; exit(1); }
 
 } // common
