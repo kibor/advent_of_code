@@ -8,8 +8,9 @@
 #include <ranges>
 
 #include "common.h"
+#include "1.h"
 
-namespace task1 {
+namespace {
 
 template<typename TIter>
 int find_digit(TIter begin, TIter end) {
@@ -30,7 +31,7 @@ int get_number(const std::string& line) {
 
 class digital_data {
 public:
-    digital_data(){
+    digital_data() {
         start_index = -1;
         end_index = -1;
         start_digit = -1;
@@ -65,7 +66,7 @@ private:
 
 void look_for_letter_digit(const std::string& line, const std::string& letter_digit, int digit, digital_data& dd) {
     int i = 0;
-    while(true) {
+    while (true) {
         // Skip data that we don't care about.
         if (i >= dd.get_start_index() && i <= dd.get_end_index()) {
             i = dd.get_end_index() + 1;
@@ -105,6 +106,10 @@ int get_number2(const std::string& line) {
 
     return dd.get_number();
 }
+
+} // namespace
+
+namespace task1 {
 
 int main()
 {

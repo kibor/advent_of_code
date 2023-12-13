@@ -12,14 +12,15 @@
 #include <vector>
 
 #include "common.h"
+#include "2.h"
 
-namespace task2 {
+namespace {
 
 bool possible_set(const std::string_view color, int count) {
     const int RED_LIMIT = 12;
     const int GREEN_LIMIT = 13;
     const int BLUE_LIMIT = 14;
-    
+
     if (color == "red") {
         return count <= RED_LIMIT;
     }
@@ -73,6 +74,10 @@ int game_power(const std::string_view game_str) {
 
     return result;
 }
+
+} // namespace 
+
+namespace task2 {
 
 int main()
 {

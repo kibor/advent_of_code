@@ -9,8 +9,9 @@
 #include <unordered_map>
 
 #include "common.h"
+#include "4.h"
 
-namespace task4 {
+namespace {
 
 int get_winning_cards_count(const std::string& line) {
     auto it = std::ranges::find(line, ':');
@@ -21,9 +22,9 @@ int get_winning_cards_count(const std::string& line) {
     bool read_all_winning_cards = false;
     int won_count = 0;
 
-    for (const auto word : common::split_string(numbers, " ") 
-            | std::views::transform(common::trim)
-            | std::views::filter([](const std::string_view& str) { return !str.empty(); })
+    for (const auto word : common::split_string(numbers, " ")
+        | std::views::transform(common::trim)
+        | std::views::filter([](const std::string_view& str) { return !str.empty(); })
         ) {
 
         if (word == "|") {
@@ -34,7 +35,8 @@ int get_winning_cards_count(const std::string& line) {
         int number = common::parse_number<int>(word);
         if (read_all_winning_cards) {
             won_count += winning_numbers.contains(number) ? 1 : 0;
-        } else {
+        }
+        else {
             winning_numbers.insert(number);
         }
     }
@@ -69,6 +71,10 @@ int get_cards_copies_count() {
 
     return result;
 }
+
+} // namespace
+
+namespace task4 {
 
 int main()
 {

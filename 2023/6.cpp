@@ -8,24 +8,25 @@
 #include <tuple>
 
 #include "common.h"
+#include "6.h"
 
-namespace task6 {
+namespace {
 
 std::vector<unsigned long> extract_numbers(const std::string& line) {
     std::vector<unsigned long> result;
     auto lines = common::split_string(line, " ");
-    
+
     // Skip first word
     lines.erase(lines.begin());
-    for (const auto number : lines 
-            | std::views::transform(common::trim)
-            | std::views::filter([](const std::string_view& str) { return !str.empty(); })
-            | std::views::transform(common::parse_number<unsigned long>)
+    for (const auto number : lines
+        | std::views::transform(common::trim)
+        | std::views::filter([](const std::string_view& str) { return !str.empty(); })
+        | std::views::transform(common::parse_number<unsigned long>)
         ) {
-            std::cout << "Found number " << number << std::endl;
-            result.push_back(number);
-        }
-        
+        std::cout << "Found number " << number << std::endl;
+        result.push_back(number);
+    }
+
     return result;
 }
 
@@ -42,12 +43,16 @@ int get_win_count(unsigned long time, unsigned long record) {
         }
     }
 
-    std::cout << "Win count for time " << time << " and record " << record << " is " << win_count << std::endl; 
+    std::cout << "Win count for time " << time << " and record " << record << " is " << win_count << std::endl;
 
     return win_count;
 }
 
-unsigned long main() {
+} // namespace
+
+namespace task6 {
+
+int main() {
     std::ifstream input("6.input");
     VERIFY(input, << "Can't open file");
 

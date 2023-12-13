@@ -11,12 +11,13 @@
 #include <unordered_set>
 
 #include "common.h"
+#include "3.h"
 
-namespace task3 {
+namespace {
 
 struct hash_pair {
     template <class T1, class T2>
-    size_t operator()(const std::pair<T1, T2>&p) const
+    size_t operator()(const std::pair<T1, T2>& p) const
     {
         auto hash1 = std::hash<T1>{}(p.first);
         auto hash2 = std::hash<T2>{}(p.second);
@@ -33,7 +34,7 @@ struct hash_pair {
 class Solver {
 public:
     Solver(bool accept_all_symbols = true)
-    : accept_all_symbols(accept_all_symbols) {
+        : accept_all_symbols(accept_all_symbols) {
 
     }
 
@@ -137,7 +138,7 @@ private:
             value += ch;
         }
 
-        int get_value () const {
+        int get_value() const {
             return std::stoi(value);
         }
     };
@@ -253,6 +254,10 @@ private:
     std::unordered_map<coords, int, hash_pair> numbers;
     std::unordered_set<coords, hash_pair> symbols;
 };
+
+} // namespace
+
+namespace task3 {
 
 int main() {
     std::ifstream input("3.input");

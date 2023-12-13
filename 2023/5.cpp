@@ -6,11 +6,13 @@
 #include <string_view>
 #include <unordered_map>
 #include <tuple>
+#include <algorithm>
 #include <limits>
 
 #include "common.h"
+#include "5.h"
 
-namespace task5 {
+namespace {
 
 class Solver {
 public:
@@ -306,7 +308,11 @@ private:
     std::unordered_map<std::string, Mapper> mappers;
 };
 
-unsigned long main() {
+} // namespace
+
+namespace task5 {
+
+int main() {
     std::ifstream input("5.input");
     VERIFY(input, << "Can't open file");
 

@@ -13,7 +13,7 @@ namespace common {
 #define VERIFY(x, msg) if (!(x)) { std::cerr msg << std::endl; exit(1); }
 
 template<typename T>
-T parse_number(const std::string_view int_str) {
+inline T parse_number(const std::string_view int_str) {
     T result = 0;
     auto [ptr, ec] = std::from_chars(int_str.data(), int_str.data() + int_str.length(), result);
 
@@ -21,7 +21,7 @@ T parse_number(const std::string_view int_str) {
     return result;    
 }
 
-std::vector<std::string_view> split_string(const std::string_view& str, const std::string& delim) {
+inline std::vector<std::string_view> split_string(const std::string_view& str, const std::string& delim) {
     std::vector<std::string_view> result;
     for (const auto word : std::views::split(str, delim)) {
         std::string_view token(word.begin(), word.end());
@@ -31,7 +31,7 @@ std::vector<std::string_view> split_string(const std::string_view& str, const st
     return result;
 }
 
-std::string_view trim(const std::string_view sv) {
+inline std::string_view trim(const std::string_view sv) {
     auto view = sv
         | std::views::drop_while(isspace) 
         | std::views::reverse 
@@ -41,7 +41,7 @@ std::string_view trim(const std::string_view sv) {
     return std::string_view{view.begin().base().base(), view.end().base().base()};
 }
 
-std::string sv_to_string(const std::string_view sv) {
+inline std::string sv_to_string(const std::string_view sv) {
     return std::string(sv.begin(), sv.end());
 }
 
