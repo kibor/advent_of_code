@@ -1,3 +1,4 @@
+#include <array>
 #include <fstream>
 #include <string>
 #include <iostream>
@@ -84,7 +85,7 @@ private:
     }
 
     static size_t card_strength(char ch) {
-        static std::vector<char> cards = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+        static const std::array<char, 13> cards = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
 
         auto it = std::ranges::find(cards, ch);
         VERIFY(it != cards.end(), << "Card doesn't exist");
