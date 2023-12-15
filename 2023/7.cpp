@@ -23,7 +23,7 @@ std::tuple<std::string, int> parse_line(const std::string& line) {
 class Hand {
 public:
     Hand() = default;
-    Hand(std::string hand, int bid) : hand_(hand), bid_(bid) {}
+    Hand(const std::string& hand, int bid) : hand_(hand), bid_(bid) {}
     Hand& operator=(const Hand& hand) = default;
 
 public:
@@ -38,10 +38,15 @@ public:
             }
         }
 
+        VERIFY(false, << "We should never come here");
         return std::strong_ordering::equal;
     }
 
-private:
+public:
+    const std::string& hand() const { return hand_; }
+    int bid() const { return bid_; }
+
+protected:
     static const int FIVE_OF_A_KIND = 6;
     static const int FOUR_OF_A_KIND = 5;
     static const int FULL_HOUSE = 4;
@@ -50,8 +55,7 @@ private:
     static const int ONE_PAIR = 1;
     static const int HIGH_CARD = 0;
 
-private:
-    int hand_strength() const {
+    virtual int hand_strength() const {
         std::unordered_map<char, int> kinds;
         for (char ch : hand_) {
             ++kinds[ch];
@@ -85,8 +89,8 @@ private:
         return TWO_PAIRS;
     }
 
-    static size_t card_strength(char ch) {
-        static const std::array<char, 13> cards = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+    size_t card_strength(char ch) const {
+        const auto& cards = get_cards_array();
 
         auto it = std::ranges::find(cards, ch);
         VERIFY(it != cards.end(), << "Card doesn't exist");
@@ -94,25 +98,84 @@ private:
         return std::distance(cards.begin(), it);
     }
 
-public:
-    const std::string& hand() const { return hand_; }
-    int bid() const { return bid_; }
+    virtual const std::array<char, 13>& get_cards_array() const {
+        static const std::array<char, 13> cards = {'2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'};
+        return cards;
+    }
 
-
-private:
+protected:
     std::string hand_;
     int bid_;
 };
+
+class HandNewAlgo : public Hand {
+public:
+    HandNewAlgo() = default;
+    HandNewAlgo(const std::string& hand, int bid) : Hand(hand, bid) {}
+    HandNewAlgo& operator=(const HandNewAlgo& hand) = default;
+
+private:
+    virtual const std::array<char, 13>& get_cards_array() const override {
+        static const std::array<char, 13> cards = {'J', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'Q', 'K', 'A'};
+        return cards;
+    }
+
+    virtual int hand_strength() const override {
+        auto j_pos = std::ranges::find(hand_, 'J');
+        if (j_pos == hand_.end()) {
+            return Hand::hand_strength();
+        }
+
+        std::unordered_map<char, int> kinds;
+        for (char ch : hand_) {
+            ++kinds[ch];
+        }
+
+        const size_t size = kinds.size();
+
+        if (size == 1) {
+            return FIVE_OF_A_KIND;
+        }
+
+        size_t max_card_count = 0;
+        char card = 'J';
+
+        if (size == 5) {
+            return HIGH_CARD;
+        }
+
+        if (size == 4) {
+            return ONE_PAIR;
+        }
+
+        if (size == 2) {
+            auto value = kinds.begin()->second;
+            return value == 1 || value == 4 ? FOUR_OF_A_KIND : FULL_HOUSE;
+        }
+
+        for (auto [key, value] : kinds) {
+            if (value == 3) {
+                return THREE_OF_A_KIND;
+            }
+        }
+
+        return TWO_PAIRS;
+    }
+};
+
 
 } // namespace
 
 namespace task7 {
 
 int main() {
+    // typedef Hand HandType;
+    typedef HandNewAlgo HandType;
+
     std::ifstream input("7.input");
     VERIFY(input, << "Can't open file");
 
-    std::vector<Hand> hands; 
+    std::vector<HandType> hands; 
     std::string line;
     while (std::getline(input, line)) {
         auto [hand, bid] = parse_line(line);
