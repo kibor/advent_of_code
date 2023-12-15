@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <tuple>
 #include <unordered_map>
+#include <compare>
 
 #include "common.h"
 #include "7.h"
@@ -94,7 +95,7 @@ private:
     }
 
 public:
-    std::string hand() const { return hand_; }
+    const std::string& hand() const { return hand_; }
     int bid() const { return bid_; }
 
 
@@ -120,8 +121,9 @@ int main() {
         hands.emplace_back(hand, bid);
     }
 
-    unsigned long result = 0;
     std::ranges::sort(hands, std::less());
+
+    unsigned long result = 0;
     for (int i = 0; i < hands.size(); ++i) {
         const auto& hand = hands[i];
         std::cout << "Hand " << hand.hand() << " has rank " << i + 1 << " and bid = " << hand.bid() << std::endl;
