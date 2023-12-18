@@ -61,6 +61,10 @@ protected:
             ++kinds[ch];
         }
 
+        return calculate_strength(kinds);
+    }
+
+    static int calculate_strength(const std::unordered_map<char, int>& kinds) {
         const size_t size = kinds.size();
 
         if (size == 1) {
@@ -80,7 +84,7 @@ protected:
             return value == 1 || value == 4 ? FOUR_OF_A_KIND : FULL_HOUSE;
         }
 
-        for (auto [key, value] : kinds) {
+        for (const auto& [key, value] : kinds) {
             if (value == 3) {
                 return THREE_OF_A_KIND;
             }
@@ -121,8 +125,7 @@ private:
     }
 
     virtual int hand_strength() const override {
-        auto j_pos = std::ranges::find(hand_, 'J');
-        if (j_pos == hand_.end()) {
+        if (std::ranges::find(hand_, 'J') == hand_.end()) {
             return Hand::hand_strength();
         }
 
@@ -132,34 +135,36 @@ private:
         }
 
         const size_t size = kinds.size();
-
         if (size == 1) {
             return FIVE_OF_A_KIND;
         }
 
+        update_kinds(kinds);
+
+        return calculate_strength(kinds);
+    }
+
+    static void update_kinds(std::unordered_map<char, int>& kinds) {
+        size_t joker_count = 0;
         size_t max_card_count = 0;
-        char card = 'J';
+        for (const auto& [key, value] : kinds) {
+            if (key == 'J') {
+                joker_count = value;
+                continue;
+            }
 
-        if (size == 5) {
-            return HIGH_CARD;
-        }
-
-        if (size == 4) {
-            return ONE_PAIR;
-        }
-
-        if (size == 2) {
-            auto value = kinds.begin()->second;
-            return value == 1 || value == 4 ? FOUR_OF_A_KIND : FULL_HOUSE;
-        }
-
-        for (auto [key, value] : kinds) {
-            if (value == 3) {
-                return THREE_OF_A_KIND;
+            if (value > max_card_count) {
+                max_card_count = value;
             }
         }
 
-        return TWO_PAIRS;
+        kinds.erase('J');
+        for (auto& [key, value] : kinds) {
+            if (value == max_card_count) {
+                value += joker_count;
+                break;
+            }
+        }
     }
 };
 
