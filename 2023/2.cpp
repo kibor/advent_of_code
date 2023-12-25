@@ -29,7 +29,7 @@ bool possible_set(const std::string_view color, int count) {
         return count <= BLUE_LIMIT;
     }
 
-    VERIFY(false, << "Unknown color" << color);
+    FAIL(<< "Unknown color" << color);
 }
 
 bool game_is_possible(const std::string_view game_str) {

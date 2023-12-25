@@ -38,7 +38,7 @@ public:
             }
         }
 
-        VERIFY(false, << "We should never come here");
+        FAIL(<< "We should never come here");
         return std::strong_ordering::equal;
     }
 

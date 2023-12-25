@@ -5,6 +5,7 @@
 #include "5.h"
 #include "6.h"
 #include "7.h"
+#include "8.h"
 
 int main() {
 	// task1::main();
@@ -13,7 +14,8 @@ int main() {
 	// task4::main();
 	// task5::main();
 	// task6::main();
-	task7::main();
+	// task7::main();
+	task8::main();
 
 	return 0;
 }

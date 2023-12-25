@@ -253,7 +253,7 @@ private:
                 return std::make_pair(range_start, range_end);
             }
 
-            VERIFY(false, << "We can't be here");
+            FAIL(<< "We can't be here");
         }
 
         void optimize() {

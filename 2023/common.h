@@ -12,6 +12,8 @@ namespace common {
 
 #define VERIFY(x, msg) if (!(x)) { std::cerr msg << std::endl; exit(1); }
 
+#define FAIL(msg) VERIFY(false, msg) 
+
 template<typename T>
 inline T parse_number(const std::string_view int_str) {
     T result = 0;
