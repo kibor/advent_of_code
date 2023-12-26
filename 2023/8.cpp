@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string_view>
 #include <algorithm>
+#include <vector>
 #include <stdio.h>
 #include <unordered_map>
 
@@ -31,6 +32,64 @@ namespace {
             current = direction == 'L' ? value.first : value.second;
 
             ++result;
+        }
+
+        return result;
+    }
+
+
+    typedef std::vector<std::string_view> Points;
+
+    bool check_if_finish(const Points& points) {
+        return std::ranges::find_if_not(points, [](const std::string_view& p) { return p.ends_with('Z'); }) == points.end();
+    }
+
+    unsigned long count_matches(const Points& points) {
+        unsigned long result = 0;
+        for (const auto& p : points) {
+            if (p.ends_with('Z')) {
+                ++result;
+            }
+        }
+
+        return result;
+    }
+
+    unsigned long solve_part_2(const std::string& directions, DesertMap& desert_map) {
+        unsigned long result = 0;
+        Points points;
+
+        for (const auto& [key, value] : desert_map) {
+            if (key.ends_with('A')) {
+                points.emplace_back(key);
+                std::cout << "Starting point " << key << std::endl;
+            }
+        }
+
+
+        for (const auto& p : points) {
+            std::string_view starting_point = p;
+            int steps = 0;
+
+            std::cout << "Checking starting point " << p << std::endl;
+            while (true) {
+                if (starting_point.ends_with('Z')) {
+                    break;
+                }
+
+                // if (check_if_finish(points)) {
+                //    break;
+                // }
+
+                char direction = directions[steps % directions.size()];
+                VERIFY(direction == 'L' || direction == 'R', << "Wrong direction");
+                const auto& value = desert_map[std::string(starting_point)];
+                starting_point = direction == 'L' ? value.first : value.second;
+
+                ++steps;
+            }
+
+            std::cout << "For starting point " << p << " number of steps is " << steps << std::endl;
         }
 
         return result;
@@ -71,7 +130,8 @@ int main() {
         std::cout << "src = " << key << ", left = " << value.first << ", right = " << value.second << std::endl;
     }
 
-    unsigned long result = solve_part_1(directions, desert_map);    
+    // unsigned long result = solve_part_1(directions, desert_map);
+    unsigned long result = solve_part_2(directions, desert_map);
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
