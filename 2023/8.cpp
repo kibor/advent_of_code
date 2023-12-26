@@ -4,6 +4,7 @@
 #include <string_view>
 #include <algorithm>
 #include <stdio.h>
+#include <unordered_map>
 
 #include "common.h"
 #include "8.h"
@@ -28,6 +29,7 @@ int main() {
     std::getline(input, line);
     VERIFY(line.empty(), << "Must be empty");
 
+    std::unordered_map<std::string, std::pair<std::string, std::string>> desert_map;
     while (std::getline(input, line)) {
         constexpr size_t NAME_LENGTH = 4;
         char src[NAME_LENGTH] = {};
@@ -35,12 +37,32 @@ int main() {
         char right[NAME_LENGTH] = {};
 
         sscanf(line.c_str(), "%3s = (%3s, %3s)", src, left, right);
+        VERIFY(!desert_map.contains(src), << "Found duplicate");
 
-        std::cout << "Src = " << src << ", left = " << left << ", right = " << right << std::endl;
+        desert_map.insert(std::make_pair(src, std::make_pair(left, right)));
+    }
 
+    for (const auto& [key, value] : desert_map) {
+        std::cout << "src = " << key << ", left = " << value.first << ", right = " << value.second << std::endl;
     }
 
     unsigned long result = 0;
+    std::string current = "AAA";
+    while (true) {
+        std::cout << "Current place = " << current << std::endl;
+        if (current == "ZZZ") {
+            break;
+        }
+
+        char direction = directions[result % directions.size()];
+        VERIFY(direction == 'L' || direction == 'R', << "Wrong direction");
+        VERIFY(desert_map.contains(current), << "Unknown direction");
+
+        const auto& value = desert_map[current];
+        current = direction == 'L' ? value.first : value.second;
+
+        ++result;
+    }
     
     std::cout << "Result is " << result << std::endl;
     return 0;
