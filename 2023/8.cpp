@@ -11,6 +11,31 @@
 
 namespace {
 
+    typedef std::unordered_map<std::string, std::pair<std::string, std::string>> DesertMap;
+
+    unsigned long solve_part_1(const std::string& directions, DesertMap& desert_map) {
+        unsigned long result = 0;
+        std::string current = "AAA";
+        
+        while (true) {
+            std::cout << "Current place = " << current << std::endl;
+            if (current == "ZZZ") {
+                break;
+            }
+
+            char direction = directions[result % directions.size()];
+            VERIFY(direction == 'L' || direction == 'R', << "Wrong direction");
+            VERIFY(desert_map.contains(current), << "Unknown direction");
+
+            const auto& value = desert_map[current];
+            current = direction == 'L' ? value.first : value.second;
+
+            ++result;
+        }
+
+        return result;
+    }
+
 
 } // namespace
 
@@ -29,7 +54,7 @@ int main() {
     std::getline(input, line);
     VERIFY(line.empty(), << "Must be empty");
 
-    std::unordered_map<std::string, std::pair<std::string, std::string>> desert_map;
+    DesertMap desert_map;
     while (std::getline(input, line)) {
         constexpr size_t NAME_LENGTH = 4;
         char src[NAME_LENGTH] = {};
@@ -46,24 +71,7 @@ int main() {
         std::cout << "src = " << key << ", left = " << value.first << ", right = " << value.second << std::endl;
     }
 
-    unsigned long result = 0;
-    std::string current = "AAA";
-    while (true) {
-        std::cout << "Current place = " << current << std::endl;
-        if (current == "ZZZ") {
-            break;
-        }
-
-        char direction = directions[result % directions.size()];
-        VERIFY(direction == 'L' || direction == 'R', << "Wrong direction");
-        VERIFY(desert_map.contains(current), << "Unknown direction");
-
-        const auto& value = desert_map[current];
-        current = direction == 'L' ? value.first : value.second;
-
-        ++result;
-    }
-    
+    unsigned long result = solve_part_1(directions, desert_map);    
     std::cout << "Result is " << result << std::endl;
     return 0;
 }
