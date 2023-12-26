@@ -40,10 +40,6 @@ namespace {
 
     typedef std::vector<std::string_view> Points;
 
-    bool check_if_finish(const Points& points) {
-        return std::ranges::find_if_not(points, [](const std::string_view& p) { return p.ends_with('Z'); }) == points.end();
-    }
-
     unsigned long count_matches(const Points& points) {
         unsigned long result = 0;
         for (const auto& p : points) {
@@ -76,10 +72,6 @@ namespace {
                 if (starting_point.ends_with('Z')) {
                     break;
                 }
-
-                // if (check_if_finish(points)) {
-                //    break;
-                // }
 
                 char direction = directions[steps % directions.size()];
                 VERIFY(direction == 'L' || direction == 'R', << "Wrong direction");
