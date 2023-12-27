@@ -66,11 +66,30 @@ long calculate_last_element(const SequenceList& sequence_list) {
     return next_element;
 }
 
-long get_next_number(const std::string& line) {
+long calculate_first_element(const SequenceList& sequence_list) {
+    long first_element = 0;
+    for (const auto& sequence : std::views::reverse(sequence_list)) {
+        VERIFY(!sequence.empty(), << "Empty sequence");
+
+        first_element = sequence.front() - first_element;
+    }
+
+    std::cout << "First element is " << first_element << std::endl;
+    return first_element;
+}
+
+long get_last_number(const std::string& line) {
     const auto sequence = extract_sequence(line);
     const auto sequence_list = populate_sequence(sequence);
 
     return calculate_last_element(sequence_list);
+}
+
+long get_first_number(const std::string& line) {
+    const auto sequence = extract_sequence(line);
+    const auto sequence_list = populate_sequence(sequence);
+
+    return calculate_first_element(sequence_list);
 }
 
 } // namespace
@@ -84,7 +103,7 @@ int main() {
     std::string line;
     long result = 0;
     while (std::getline(input, line)) {
-        result += get_next_number(line);
+        result += get_first_number(line);
     }
 
     std::cout << "Result is " << result << std::endl;
