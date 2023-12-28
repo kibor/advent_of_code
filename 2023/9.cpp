@@ -16,7 +16,7 @@ namespace {
 typedef std::vector<long> Sequence;
 typedef std::list<Sequence> SequenceList;
 
-Sequence extract_sequence(const std::string& line) {
+Sequence extract_sequence(const std::string& line, bool solve_second_half) {
     Sequence sequence;
     for (const auto& word : common::split_string(line, " ")) {
         const auto number = common::parse_number<long>(word);
@@ -26,6 +26,10 @@ Sequence extract_sequence(const std::string& line) {
     }
 
     std::cout << std::endl;
+
+    if (solve_second_half) {
+        std::reverse(sequence.begin(), sequence.end());
+    }
     return sequence;
 }
 
@@ -78,18 +82,11 @@ long calculate_first_element(const SequenceList& sequence_list) {
     return first_element;
 }
 
-long get_last_number(const std::string& line) {
-    const auto sequence = extract_sequence(line);
+long get_last_number(const std::string& line, bool solve_second_half) {
+    const auto sequence = extract_sequence(line, solve_second_half);
     const auto sequence_list = populate_sequence(sequence);
 
     return calculate_last_element(sequence_list);
-}
-
-long get_first_number(const std::string& line) {
-    const auto sequence = extract_sequence(line);
-    const auto sequence_list = populate_sequence(sequence);
-
-    return calculate_first_element(sequence_list);
 }
 
 } // namespace
@@ -99,11 +96,13 @@ namespace task9 {
 int main() {
     std::ifstream input("9.input");
     VERIFY(input, << "Can't open file");
+    
+    bool solve_second_half = true;
 
     std::string line;
     long result = 0;
     while (std::getline(input, line)) {
-        result += get_first_number(line);
+        result += get_last_number(line, solve_second_half);
     }
 
     std::cout << "Result is " << result << std::endl;
