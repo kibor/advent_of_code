@@ -7,6 +7,8 @@
 #include <list>
 #include <stdio.h>
 #include <unordered_set>
+#include <tuple>
+#include <optional>
 
 #include "common.h"
 #include "10.h"
@@ -98,24 +100,27 @@ public:
 
     }
 
-    long get_step_count() {
+    long get_step_count(){
         update_start_cell();
         const auto visited = traverse_loop();
-        print_maze(visited);
+        const auto [external_cells, internal_cells] = mark_cells(visited);
+        print_maze(visited, external_cells, internal_cells);
 
-        std::cout << "Steps count = " << visited.size() << std::endl; 
+        std::cout << "Steps count = " << visited.size() 
+            << ", external cells count = " << external_cells.size()
+            << ", internal cells count = " << internal_cells.size() << std::endl;
         VERIFY(visited.size() % 2 == 0, << "Wrong amount of steps");
         return visited.size() / 2;
     }
 
 private:
-    Coords traverse_loop() {
+    Coords traverse_loop() const {
         Coords visited;
 
         int x = start_x_;
         int y = start_y_;
 
-        while(true) {
+        while (true) {
             const auto coord = std::make_pair(x, y);
             VERIFY(!visited.contains(coord), << "Already visited x = " << x << " y = " << y);
 
@@ -149,16 +154,90 @@ private:
         return visited;
     }
 
-    void print_maze(const Coords& visited) {
+    std::tuple<Coords, Coords> mark_cells(const Coords& visited) const {
+        Coords external_cells;
+        Coords internal_cells;
+
+        for (int y = 0; y < maze_.size(); ++y) {
+            const auto& row = maze_[y];
+            for (int x = 0; x < row.size(); ++x) {
+                const auto coord = std::make_pair(x, y);
+
+                if (visited.contains(coord)) {
+                    continue;
+                }
+
+                if (is_external(visited, x, y, row.size(), maze_.size())) {
+                    external_cells.insert(coord);
+                } else {
+                    internal_cells.insert(coord);
+                }
+            }
+
+            std::cout << std::endl;
+        }
+
+        return std::make_tuple(external_cells, internal_cells);
+    }
+
+    static bool has_north_south_intersection(const Cell& c1, const Cell& c2) {
+        return c1.can_go_north() && c2.can_go_south()
+            || c2.can_go_north() && c1.can_go_south();
+    }
+
+    bool is_external(const Coords& visited, const int x, const int y, const int x_size, const int y_size) const {
+        int intersections = 0;
+        std::optional<Cell> prev_cell;
+
+        // From left border to x
+        for (int x1 = x - 1; x1 >= 0; --x1) {
+            const auto& cell = get_cell(x1, y);
+            if (!visited.contains(std::make_pair(x1, y))) {
+                continue;
+            }
+
+            if (cell.can_go_north() && cell.can_go_south()) {
+                ++intersections;
+                continue;
+            }
+
+            if (cell.can_go_east() && cell.can_go_west()) {
+                continue;
+            }
+
+            if (!prev_cell) {
+                prev_cell = cell;
+                continue;
+            }
+
+            if (has_north_south_intersection(cell, *prev_cell)) {
+                    ++intersections;
+            }
+            
+            prev_cell.reset();
+        }
+
+        return intersections % 2 == 0;
+    }
+
+    void print_maze(const Coords& visited, const Coords& external_cells, const Coords& internal_cells) const {
         std::cout << "Maze: " << std::endl;
 
         for (int y = 0; y < maze_.size(); ++y) {
             const auto& row = maze_[y];
             for (int x = 0; x < row.size(); ++x) {
-                if (!visited.contains(std::make_pair(x, y))) {
-                    std::cout << '.';
-                } else {
+                const auto coord = std::make_pair(x, y);
+                if (visited.contains(coord)) {
                     std::cout << '#';
+                }
+                else if (external_cells.contains(coord)) {
+                    std::cout << 'O';
+                }
+                else if (internal_cells.contains(coord)) {
+                    std::cout << 'I';
+                }
+                else {
+                    FAIL(<< "We cannot be here");
                 }
             }
 
@@ -254,7 +333,7 @@ int main() {
     }
 
     int result = solver.get_step_count();
-    std::cout << "Result is " << result << std::endl;
+    std::cout << "Result = " << result << std::endl;
     return 0;
 }
 
