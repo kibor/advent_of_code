@@ -7,6 +7,8 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
 
 namespace common {
 
@@ -47,4 +49,24 @@ inline std::string sv_to_string(const std::string_view sv) {
     return std::string(sv.begin(), sv.end());
 }
 
+
+struct hash_pair {
+    template <class T1, class T2>
+    size_t operator()(const std::pair<T1, T2>& p) const
+    {
+        auto hash1 = std::hash<T1>{}(p.first);
+        auto hash2 = std::hash<T2>{}(p.second);
+
+        if (hash1 != hash2) {
+            return hash1 ^ hash2;
+        }
+
+        // If hash1 == hash2, their XOR is zero.
+        return hash1;
+    }
+};
+
+template<typename T> using Coords = std::pair<T, T>;
+template<typename T> using CoordSet = std::unordered_set<Coords<T>, hash_pair>;
+template<typename K, typename V> using CoordMap = std::unordered_map<Coords<K>, V, hash_pair>;
 } // common

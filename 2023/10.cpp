@@ -15,24 +15,8 @@
 
 namespace {
 
-struct hash_pair {
-    template <class T1, class T2>
-    size_t operator()(const std::pair<T1, T2>& p) const
-    {
-        auto hash1 = std::hash<T1>{}(p.first);
-        auto hash2 = std::hash<T2>{}(p.second);
-
-        if (hash1 != hash2) {
-            return hash1 ^ hash2;
-        }
-
-        // If hash1 == hash2, their XOR is zero.
-        return hash1;
-    }
-};
-
-typedef std::pair<int, int> coords;
-typedef std::unordered_set<coords, hash_pair> Coords;
+using Coords = common::Coords<int>;
+using CoordSet = common::CoordSet<int>;
 
 class Cell {
 public:
@@ -114,8 +98,8 @@ public:
     }
 
 private:
-    Coords traverse_loop() const {
-        Coords visited;
+    CoordSet traverse_loop() const {
+        CoordSet visited;
 
         int x = start_x_;
         int y = start_y_;
@@ -154,9 +138,9 @@ private:
         return visited;
     }
 
-    std::tuple<Coords, Coords> mark_cells(const Coords& visited) const {
-        Coords external_cells;
-        Coords internal_cells;
+    std::tuple<CoordSet, CoordSet> mark_cells(const CoordSet& visited) const {
+        CoordSet external_cells;
+        CoordSet internal_cells;
 
         for (int y = 0; y < maze_.size(); ++y) {
             const auto& row = maze_[y];
@@ -185,7 +169,7 @@ private:
             || c2.can_go_north() && c1.can_go_south();
     }
 
-    bool is_external(const Coords& visited, const int x, const int y, const int x_size, const int y_size) const {
+    bool is_external(const CoordSet& visited, const int x, const int y, const int x_size, const int y_size) const {
         int intersections = 0;
         std::optional<Cell> prev_cell;
 
@@ -220,7 +204,7 @@ private:
         return intersections % 2 == 0;
     }
 
-    void print_maze(const Coords& visited, const Coords& external_cells, const Coords& internal_cells) const {
+    void print_maze(const CoordSet& visited, const CoordSet& external_cells, const CoordSet& internal_cells) const {
         std::cout << "Maze: " << std::endl;
 
         for (int y = 0; y < maze_.size(); ++y) {
