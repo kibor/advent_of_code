@@ -13,7 +13,7 @@ namespace {
 
 class Solver {
 public:
-    void add_line(const std::string& line, int line_number) {
+    void add_line(const std::string& line, long line_number) {
         if (x_size_ == -1) {
             x_size_ = line.size();
         }
@@ -23,38 +23,99 @@ public:
 
         y_size_ = line_number;
 
-        for (int x = 0; x < line.size(); ++x) {
+        for (long x = 0; x < line.size(); ++x) {
             if (line[x] != GALAXY) {
                 continue;
             }
 
-            galaxies_.insert(std::make_pair(x, line_number));
+            galaxies_.emplace_back(x, line_number);
         }
-
     }
 
-    int get_sum_of_all_paths() {
+    unsigned long long get_sum_of_all_paths() {
         const auto empty_rows = find_empty_rows();
         const auto empty_cols = find_empty_cols();
-        return 0;
+        update_coords(empty_rows, empty_cols);
+        print_coords();
+
+        return calc_distances();
     }
 
 private:
-    std::vector<int> find_empty_rows() const {
-        return {};
+    long calc_distances() const {
+        unsigned long long result = 0;
+
+        for (const auto& g1 : galaxies_) {
+            for (const auto& g2 : galaxies_) {
+                unsigned long long temp_result = result + std::abs(g1.first - g2.first) + std::abs(g1.second - g2.second);
+                VERIFY(temp_result >= result, << "Overflow. result = " << result << ", temp result = " << temp_result);
+
+                result = temp_result;
+            }
+        }
+
+        std::cout << "Final result = " << result << ", half of it is " << result / 2 << std::endl;
+
+        return result;
     }
 
-    std::vector<int> find_empty_cols() const {
-        return {};
+    void print_coords() const {
+        for (const auto& g : galaxies_) {
+            std::cout << "x = " << g.first << ", y = " << g.second << std::endl;
+        }
+    }
+
+    void update_coords(const std::unordered_set<long>& empty_rows, const std::unordered_set<long>& empty_cols) {
+        for (const long row : std::ranges::reverse_view(empty_rows)) {
+            for (auto& galaxy : galaxies_) {
+                if (galaxy.first > row) {
+                    galaxy.first += 999999;
+                }
+            }
+        }
+
+        for (const long col : std::ranges::reverse_view(empty_cols)) {
+            for (auto& galaxy : galaxies_) {
+                if (galaxy.second > col) {
+                    galaxy.second += 999999;
+                }
+            }
+        }
+    }
+
+    std::unordered_set<long> find_empty_rows() const {
+        std::unordered_set<long> rows;
+        for (long x = 0; x < x_size_; ++x) {
+            rows.insert(x);
+        }
+
+        for (const auto& galaxy : galaxies_) {
+            rows.erase(galaxy.first);
+        }
+
+        return rows;
+    }
+
+    std::unordered_set<long> find_empty_cols() const {
+        std::unordered_set<long> cols;
+        for (long y = 0; y < y_size_; ++y) {
+            cols.insert(y);
+        }
+
+        for (const auto& galaxy : galaxies_) {
+            cols.erase(galaxy.second);
+        }
+
+        return cols;
     }
 
 private:
     static const char GALAXY = '#';
 
 private:
-    common::CoordSet<int> galaxies_;
-    int x_size_ = -1;
-    int y_size_ = -1;
+    std::vector<common::Coords<long long>> galaxies_;
+    long x_size_ = -1;
+    long y_size_ = -1;
 };
 
 
@@ -69,13 +130,13 @@ int main() {
     Solver solver;    
 
     std::string line;
-    int line_number = 0;
+    long line_number = 0;
     while (std::getline(input, line)) {
         solver.add_line(line, line_number);
         ++line_number;
     }
 
-    int result = solver.get_sum_of_all_paths();
+    auto result = solver.get_sum_of_all_paths();
     std::cout << "Result = " << result << std::endl;
     return 0;
 }
