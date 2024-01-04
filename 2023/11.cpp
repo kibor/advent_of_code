@@ -32,7 +32,7 @@ public:
         }
     }
 
-    unsigned long long get_sum_of_all_paths() {
+    long long get_sum_of_all_paths() {
         const auto empty_rows = find_empty_rows();
         const auto empty_cols = find_empty_cols();
         update_coords(empty_rows, empty_cols);
@@ -42,21 +42,16 @@ public:
     }
 
 private:
-    long calc_distances() const {
-        unsigned long long result = 0;
+    long long calc_distances() const {
+        long long result = 0;
 
         for (const auto& g1 : galaxies_) {
             for (const auto& g2 : galaxies_) {
-                unsigned long long temp_result = result + std::abs(g1.first - g2.first) + std::abs(g1.second - g2.second);
-                VERIFY(temp_result >= result, << "Overflow. result = " << result << ", temp result = " << temp_result);
-
-                result = temp_result;
+                result += std::abs(g1.first - g2.first) + std::abs(g1.second - g2.second);
             }
         }
 
-        std::cout << "Final result = " << result << ", half of it is " << result / 2 << std::endl;
-
-        return result;
+        return result / 2;
     }
 
     void print_coords() const {
@@ -113,7 +108,7 @@ private:
     static const char GALAXY = '#';
 
 private:
-    std::vector<common::Coords<long long>> galaxies_;
+    std::vector<common::Coords<long>> galaxies_;
     long x_size_ = -1;
     long y_size_ = -1;
 };
@@ -140,6 +135,5 @@ int main() {
     std::cout << "Result = " << result << std::endl;
     return 0;
 }
-
 
 } // task11
