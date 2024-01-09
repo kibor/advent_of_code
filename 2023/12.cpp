@@ -26,11 +26,12 @@ public:
 private:
     class Entry {
     public:
-        Entry(const std::string_view& pattern, const std::string_view& groups)
-            : pattern_(pattern.begin(), pattern.end()) {
-            
-            init_unknown_indexes(pattern);
-            init_breakage_groups(groups);
+        Entry(const std::string_view& pattern, const std::string_view& groups) {
+            pattern_ = duplicate(pattern, '?', 5);
+            init_unknown_indexes(pattern_);
+
+            const std::string duplicated_groups = duplicate(groups, ',', 5);
+            init_breakage_groups(duplicated_groups);
 
             VERIFY(known_breakage_count_ <= total_breakage_count_, 
                 << "Incorrect invariant. known = " << known_breakage_count_ << ", total = " << total_breakage_count_);
@@ -59,7 +60,6 @@ private:
                 const auto new_option = generate_option(breakage_pattern);
                 if (is_acceptable(new_option)) {
                     ++count;
-                    std::cout << new_option << std::endl;
                 }
             } while (std::next_permutation(breakage_pattern.begin(), breakage_pattern.end()));
 
@@ -69,6 +69,16 @@ private:
         }
 
     private:
+        static std::string duplicate(const std::string_view& pattern, const char delimeter, const int count) {
+            std::string result(pattern.begin(), pattern.end());
+            for (int i = 1; i < count; ++i) {
+                result += delimeter;
+                result += pattern;
+            }
+
+            return result;
+        }
+
         std::string generate_option(const std::string& breakage_pattern) const {
             std::string result(pattern_);
             for (int i = 0; i < breakage_pattern.size(); ++i) {
@@ -132,7 +142,7 @@ private:
         static const char WORKING = '.';
 
     private:
-        const std::string pattern_;
+        std::string pattern_;
         std::vector<int> unknown_indexes_;
         std::vector<int> breakage_groups_;
         int known_breakage_count_;
