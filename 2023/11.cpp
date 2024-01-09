@@ -4,7 +4,7 @@
 #include <string_view>
 #include <algorithm>
 #include <vector>
-#include <unordered_set>
+#include <set>
 
 #include "common.h"
 #include "11.h"
@@ -60,7 +60,7 @@ private:
         }
     }
 
-    void update_coords(const std::unordered_set<long>& empty_rows, const std::unordered_set<long>& empty_cols) {
+    void update_coords(const std::vector<long>& empty_rows, const std::vector<long>& empty_cols) {
         for (const long row : std::ranges::reverse_view(empty_rows)) {
             for (auto& galaxy : galaxies_) {
                 if (galaxy.first > row) {
@@ -78,8 +78,8 @@ private:
         }
     }
 
-    std::unordered_set<long> find_empty_rows() const {
-        std::unordered_set<long> rows;
+    std::vector<long> find_empty_rows() const {
+        std::set<long> rows;
         for (long x = 0; x < x_size_; ++x) {
             rows.insert(x);
         }
@@ -88,11 +88,11 @@ private:
             rows.erase(galaxy.first);
         }
 
-        return rows;
+        return std::vector<long>(rows.begin(), rows.end());
     }
 
-    std::unordered_set<long> find_empty_cols() const {
-        std::unordered_set<long> cols;
+    std::vector<long> find_empty_cols() const {
+        std::set<long> cols;
         for (long y = 0; y < y_size_; ++y) {
             cols.insert(y);
         }
@@ -101,7 +101,7 @@ private:
             cols.erase(galaxy.second);
         }
 
-        return cols;
+        return std::vector<long>(cols.begin(), cols.end());
     }
 
 private:
