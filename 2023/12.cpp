@@ -55,9 +55,14 @@ private:
                 breakage_pattern[i] = WORKING;
             }
 
+            std::cout << "Number of possible breakages is " << breakage_pattern.size()
+                << ", breakages size = " << breakages
+                << ", number of permutations is " << factorial(breakage_pattern.size()) / factorial(breakage_pattern.size() - 2) << std::endl;
+
             int count = 0;
+            std::string new_option(pattern_);
             do {
-                const auto new_option = generate_option(breakage_pattern);
+                generate_option(breakage_pattern, new_option);
                 if (is_acceptable(new_option)) {
                     ++count;
                 }
@@ -69,6 +74,14 @@ private:
         }
 
     private:
+        static unsigned long factorial(const int n) {
+            unsigned long result = 1;
+            for (int i = 0; i <= n; ++i) {
+                result *= i;
+            }
+
+            return result;
+        }
         static std::string duplicate(const std::string_view& pattern, const char delimeter, const int count) {
             std::string result(pattern.begin(), pattern.end());
             for (int i = 1; i < count; ++i) {
@@ -79,14 +92,11 @@ private:
             return result;
         }
 
-        std::string generate_option(const std::string& breakage_pattern) const {
-            std::string result(pattern_);
+        void generate_option(const std::string& breakage_pattern, std::string& new_option) const {
             for (int i = 0; i < breakage_pattern.size(); ++i) {
                 int index = unknown_indexes_[i];
-                result[index] = breakage_pattern[i];
+                new_option[index] = breakage_pattern[i];
             }
-
-            return result;
         }
 
         bool is_acceptable(const std::string& option) const {
