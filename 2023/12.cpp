@@ -39,28 +39,9 @@ private:
         }
 
         int get_all_variations() const {
-            if (known_breakage_count_ == total_breakage_count_) {
-                return 1;
-            }
-
-            int breakages = total_breakage_count_ - known_breakage_count_;
-            std::string breakage_pattern;
-            breakage_pattern.resize(unknown_indexes_.size());
-
-            for (int i = 0; i < breakages; ++i) {
-                breakage_pattern[i] = BROKEN;
-            }
-
-            for (int i = breakages; i < breakage_pattern.size(); ++i) {
-                breakage_pattern[i] = WORKING;
-            }
-
-            std::cout << "Number of possible breakages is " << breakage_pattern.size()
-                << ", breakages size = " << breakages
-                << ", number of permutations is " << factorial(breakage_pattern.size()) / factorial(breakage_pattern.size() - 2) << std::endl;
-
-            int count = 0;
+            std::string breakage_pattern = create_breakage_pattern();
             std::string new_option(pattern_);
+            int count = 0;
             do {
                 generate_option(breakage_pattern, new_option);
                 if (is_acceptable(new_option)) {
@@ -74,14 +55,21 @@ private:
         }
 
     private:
-        static unsigned long factorial(const int n) {
-            unsigned long result = 1;
-            for (int i = 0; i <= n; ++i) {
-                result *= i;
+        std::string create_breakage_pattern() const {
+            int breakages = total_breakage_count_ - known_breakage_count_;
+            std::string breakage_pattern(unknown_indexes_.size(), WORKING);
+
+            for (int i = 0; i < breakages; ++i) {
+                breakage_pattern[i] = BROKEN;
             }
 
-            return result;
+            for (int i = breakages; i < breakage_pattern.size(); ++i) {
+                breakage_pattern[i] = WORKING;
+            }
+
+            return breakage_pattern;
         }
+
         static std::string duplicate(const std::string_view& pattern, const char delimeter, const int count) {
             std::string result(pattern.begin(), pattern.end());
             for (int i = 1; i < count; ++i) {
