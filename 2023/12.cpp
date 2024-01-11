@@ -56,15 +56,9 @@ private:
 
     private:
         std::string create_breakage_pattern() const {
-            int breakages = total_breakage_count_ - known_breakage_count_;
             std::string breakage_pattern(unknown_indexes_.size(), WORKING);
-
-            for (int i = 0; i < breakages; ++i) {
+            for (int i = 0; i < total_breakage_count_ - known_breakage_count_; ++i) {
                 breakage_pattern[i] = BROKEN;
-            }
-
-            for (int i = breakages; i < breakage_pattern.size(); ++i) {
-                breakage_pattern[i] = WORKING;
             }
 
             return breakage_pattern;
