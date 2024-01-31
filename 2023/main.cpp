@@ -10,6 +10,7 @@
 #include "10.h"
 #include "11.h"
 #include "12.h"
+#include "13.h"
 
 int main() {
 	// task1::main();
@@ -23,7 +24,8 @@ int main() {
 	// task9::main();
 	// task10::main();
 	// task11::main();
-	task12::main();
+	// task12::main();
+	task13::main();
 
 	return 0;
 }

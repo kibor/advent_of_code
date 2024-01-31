@@ -8,7 +8,7 @@
 #include <unordered_set>
 
 #include "common.h"
-#include "12.h"
+#include "13.h"
 
 namespace {
 
@@ -146,7 +146,7 @@ private:
 
 } // namespace
 
-namespace task12 {
+namespace task13 {
 
 int main() {
     std::ifstream input("12.input");
@@ -164,4 +164,4 @@ int main() {
     return 0;
 }
 
-} // task12
+} // task13
